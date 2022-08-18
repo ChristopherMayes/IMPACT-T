@@ -550,6 +550,7 @@
           ymin = temp1(2)-epsy*(temp2(2)-temp1(2))
           ymax = temp2(2)+epsy*(temp2(2)-temp1(2))
           zmin = temp1(3)-epsz*(temp2(3)-temp1(3))
+          !zmin = temp1(3)
           zmax = temp2(3)+epsz*(temp2(3)-temp1(3))
         else if(Flagbc.eq.2) then
           xmin = temp1(1)-epsx*(temp2(1)-temp1(1))
@@ -622,6 +623,8 @@
 
         hz = (zmax-zmin)/(this%Meshnum(3)-1) 
         this%Meshsize(3) = hz
+
+        !print*,"geom:",zmin,zmax
 
         if(nprocrow.gt.1) then
 

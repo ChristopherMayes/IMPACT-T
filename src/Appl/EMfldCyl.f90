@@ -1083,6 +1083,7 @@
           zz = z-this%Param(1)
           hz = (fldata%ZmaxRft-fldata%ZminRft)/fldata%NzIntvRft
           hr = (fldata%RmaxRft-fldata%RminRft)/fldata%NrIntvRft
+          !print*,"hz,hr:",hz,hr,fldata%NzIntvRft,fldata%NrIntvRft
           if(zz.le.0) then
             iz = 1
             efz = zz/hz

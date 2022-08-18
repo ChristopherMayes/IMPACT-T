@@ -307,6 +307,7 @@
 
           endif
         enddo
+        !print*,"sumrho:",sum(rho)
 
         t_rhofas = t_rhofas + elapsedtime_Timer( t0 )
 
