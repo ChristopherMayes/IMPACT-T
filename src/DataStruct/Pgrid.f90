@@ -13,7 +13,7 @@
 !----------------------------------------------------------------
       module Pgrid2dclass
 #if USE_MPI != 1
-        use mpistub
+  use mpistub
 #endif
         type Pgrid2d
           private

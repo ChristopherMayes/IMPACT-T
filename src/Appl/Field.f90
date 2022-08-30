@@ -783,6 +783,9 @@
 
         call starttime_Timer(t0)
 
+!        if(myidx.eq.0 .and. myidy.eq.0) then
+!          print*,"into integrated Green function....."
+!        endif
         gxrtable = xrtable
         gxrtable(npx-1) = xrtable(npx-1) + 1
         nblockx = 0
@@ -817,9 +820,26 @@
                 dd = vv(2)*vv(3)*log(vv(1)+rr)
                 ee = vv(1)*vv(3)*log(vv(2)+rr)
                 ff = vv(1)*vv(2)*log(vv(3)+rr)
+                !aa = vv(1)**2*vv(3)+(vv(2)**2+vv(3)**2)*vv(3) + &
+                !            vv(1)*vv(3)*rr
+                !bb = vv(1)**2*vv(2) + vv(1)*vv(2)*rr
+                !cc = vv(1)*(vv(1)**2+vv(2)**2)+vv(3)*vv(1)*(vv(3)+rr)
+                !dd = vv(3)*vv(2)*(vv(3) + rr)
+                !ee = vv(1)**2*vv(2)+vv(2)*(vv(2)**2+vv(3)*(vv(3)+rr))
+                !ff = vv(1)*vv(3)*(vv(3)+rr)
+                !ss = 4*vv(2)*vv(3)*log(vv(1)+rr) + &
+                !        4*vv(1)*vv(3)*log(vv(2)+rr) + &
+                !        4*vv(1)*vv(2)*log(vv(3)+rr)
+
+                !gg2 = cmplx(0.0d0,vv(3)**2)*log(cmplx(aa**2-bb**2,2*aa*bb)/ &
+                !        (aa**2+bb**2) ) + cmplx(0.0d0,vv(1)**2)*&
+                !        log(cmplx(cc**2-dd**2,2*cc*dd )/(cc**2+dd**2))+&
+                !        cmplx(0.0d0,vv(2)**2)*log(cmplx(ee**2-ff**2,2*ee*ff)/ &
+                !        (ee**2+ff**2) ) + ss
 
                 gg2 = aa + bb + cc + dd + ee + ff
                
+              !grntmp(i0,j0,k0) = recfourpi*real(gg2)/(4*hx*hy*hz)
               grntmp(i0,j0,k0) = recfourpi*gg2/(hx*hy*hz)
 
             enddo
@@ -835,6 +855,56 @@
             enddo
           enddo
         enddo
+
+!        print*,"inside green: ",myidx,myidy,sum(grntmp),sum(grn),hx,hy,hz
+
+!              xx(1) = iii*hx-hx/2
+!              xx(2) = iii*hx+hx/2
+!              yy(1) = jjj*hy-hy/2
+!              yy(2) = jjj*hy+hy/2
+!              zz(1) = kkk*hz-hz/2
+!              zz(2) = kkk*hz+hz/2
+!       
+!              !find the integrated Green function.
+!              n = 0
+!              do k = 1, 2
+!                do j = 1, 2
+!                  do i = 1, 2
+!                    n = n+1
+!                    rr(n) = sqrt(xx(i)**2+yy(j)**2+zz(k)**2)
+!                    aa(n) = xx(i)**2*zz(k)+(yy(j)**2+zz(k)**2)*zz(k) + &
+!                            xx(i)*zz(k)*rr(n)
+!                    bb(n) = xx(i)**2*yy(j) + xx(i)*yy(j)*rr(n)
+!                    cc(n) = xx(i)*(xx(i)**2+yy(j)**2)+zz(k)*xx(i)*(zz(k)+rr(n))
+!                    dd(n) = zz(k)*yy(j)*(zz(k) + rr(n))
+!                    ee(n) = xx(i)**2*yy(j)+yy(j)*(yy(j)**2+zz(k)*(zz(k)+rr(n)))
+!                    ff(n) = xx(i)*zz(k)*(zz(k)+rr(n))
+!                    ss(n) = 4*yy(j)*zz(k)*log(xx(i)+rr(n)) + &
+!                            4*xx(i)*zz(k)*log(yy(j)+rr(n)) + &
+!                            4*xx(i)*yy(j)*log(zz(k)+rr(n))
+!                    gg(n) = cmplx(0.0d0,zz(k)**2)*log(cmplx(aa(n)**2-bb(n)**2,2*aa(n)*bb(n))/ &
+!                            (aa(n)**2+bb(n)**2) ) + cmplx(0.0d0,xx(i)**2)*&
+!                            log(cmplx(cc(n)**2-dd(n)**2,2*cc(n)*dd(n) )/(cc(n)**2+dd(n)**2))+&
+!                            cmplx(0.0d0,yy(j)**2)*log(cmplx(ee(n)**2-ff(n)**2,2*ee(n)*ff(n))/ &
+!                            (ee(n)**2+ff(n)**2) )
+!                    gg2(n) = ss(n) +  gg(n)
+!                  enddo
+!                enddo
+!              enddo
+!              ggrr = (-gg2(1)+gg2(2)+gg2(3)-gg2(4)+gg2(5)-gg2(6)-gg2(7)+gg2(8))/4
+!              grn(i0,j0,k0) = real(ggrr)/(hx*hy*hz)
+!            enddo
+!          enddo
+!        enddo
+
+
+!        if((myidx.eq.0).and.(myidy.eq.0)) then
+!          if(nsizez.gt.1) then
+!            grn(1,1,1) = grn(1,1,2)
+!          else
+!            grn(1,1,1) = 1.0
+!          endif
+!        endif
 
         scalex = 1.0d0
         scaley = 1.0d0
@@ -870,6 +940,7 @@
         allocate(x1(n2/2+1,nsizexy,nsizez))
 
         ! FFTs along y dimensions:
+!        call MPI_BARRIER(commcol,ierr)
         call trans3d_TRANSP(nxx,n2/2+1,nsizexy,nsizey,x0,x1,npy,&
                      ystable,gyrtable,commcol,nsizez)
         deallocate(x0)
@@ -896,6 +967,7 @@
 
         deallocate(x1)
         allocate(x1(n3/2+1,nsizexy,nsizeyz))
+!        call MPI_BARRIER(commcol,ierr)
         call trans3d3_TRANSP(n2,nsizexy,nsizez,nsizeyz,x0,x1,npx,&
                       xstable,gxrtable,commrow,myidx,n3/2+1)
         deallocate(x0)
@@ -1005,6 +1077,26 @@
                 ee = vv(1)*vv(3)*log(vv(2)+rr)
                 ff = vv(1)*vv(2)*log(vv(3)+rr)
 
+!                rr = sqrt(vv(1)**2+vv(2)**2+vv(3)**2)
+!                aa = vv(1)**2*vv(3)+(vv(2)**2+vv(3)**2)*vv(3) + &
+!                            vv(1)*vv(3)*rr
+!                bb = vv(1)**2*vv(2) + vv(1)*vv(2)*rr
+!                cc = vv(1)*(vv(1)**2+vv(2)**2)+vv(3)*vv(1)*(vv(3)+rr)
+!                dd = vv(3)*vv(2)*(vv(3) + rr)
+!                ee = vv(1)**2*vv(2)+vv(2)*(vv(2)**2+vv(3)*(vv(3)+rr))
+!                ff = vv(1)*vv(3)*(vv(3)+rr)
+!                ss = 4*vv(2)*vv(3)*log(vv(1)+rr) + &
+!                        4*vv(1)*vv(3)*log(vv(2)+rr) + &
+!                        4*vv(1)*vv(2)*log(vv(3)+rr)
+!
+!                gg2 = cmplx(0.0d0,vv(3)**2)*log(cmplx(aa**2-bb**2,2*aa*bb)/ &
+!                        (aa**2+bb**2) ) + cmplx(0.0d0,vv(1)**2)*&
+!                        log(cmplx(cc**2-dd**2,2*cc*dd )/(cc**2+dd**2))+&
+!                        cmplx(0.0d0,vv(2)**2)*log(cmplx(ee**2-ff**2,2*ee*ff)/ &
+!                        (ee**2+ff**2) ) + ss
+!     
+!              grntmp(i0,j0,k0) = recfourpi*real(gg2)/(4*hx*hy*hz)
+
               gg2 = aa + bb + cc + dd + ee + ff
 
               grntmp(i0,j0,k0) = recfourpi*gg2/(hx*hy*hz)
@@ -1012,6 +1104,8 @@
             enddo
           enddo
         enddo
+
+!        print*,"grntmp:",sum(grntmp)
 
         do k0 = 1, nsizez
           do j0 = 1, nsizey
@@ -1022,6 +1116,8 @@
             enddo
           enddo
         enddo
+!        print*,"inside image shifted Green: ",myidx,myidy,sum(grntmp),sum(grn),&
+!                                               hx,hy,hz
 
         scalex = 1.0d0
         scaley = 1.0d0
@@ -1057,6 +1153,7 @@
         allocate(x1(n2/2+1,nsizexy,nsizez))
 
         ! FFTs along y dimensions:
+!        call MPI_BARRIER(commcol,ierr)
         call trans3d_TRANSP(nxx,n2/2+1,nsizexy,nsizey,x0,x1,npy,&
                      ystable,gyrtable,commcol,nsizez)
         deallocate(x0)
@@ -1083,6 +1180,7 @@
 
         deallocate(x1)
         allocate(x1(n3/2,nsizexy,nsizeyz))
+!        call MPI_BARRIER(commcol,ierr)
         call trans3d3_TRANSP(n2,nsizexy,nsizez,nsizeyz,x0,x1,npx,&
                       xstable,gxrtable,commrow,myidx,n3/2)
         deallocate(x0)
@@ -1108,6 +1206,26 @@
                 ee = vv(1)*vv(3)*log(vv(2)+rr)
                 ff = vv(1)*vv(2)*log(vv(3)+rr)
 
+!                rr = sqrt(vv(1)**2+vv(2)**2+vv(3)**2)
+!                aa = vv(1)**2*vv(3)+(vv(2)**2+vv(3)**2)*vv(3) + &
+!                            vv(1)*vv(3)*rr
+!                bb = vv(1)**2*vv(2) + vv(1)*vv(2)*rr
+!                cc = vv(1)*(vv(1)**2+vv(2)**2)+vv(3)*vv(1)*(vv(3)+rr)
+!                dd = vv(3)*vv(2)*(vv(3) + rr)
+!                ee = vv(1)**2*vv(2)+vv(2)*(vv(2)**2+vv(3)*(vv(3)+rr))
+!                ff = vv(1)*vv(3)*(vv(3)+rr)
+!                ss = 4*vv(2)*vv(3)*log(vv(1)+rr) + &
+!                        4*vv(1)*vv(3)*log(vv(2)+rr) + &
+!                        4*vv(1)*vv(2)*log(vv(3)+rr)
+!
+!                gg2 = cmplx(0.0d0,vv(3)**2)*log(cmplx(aa**2-bb**2,2*aa*bb)/ &
+!                        (aa**2+bb**2) ) + cmplx(0.0d0,vv(1)**2)*&
+!                        log(cmplx(cc**2-dd**2,2*cc*dd )/(cc**2+dd**2))+&
+!                        cmplx(0.0d0,vv(2)**2)*log(cmplx(ee**2-ff**2,2*ee*ff)/ &
+!                        (ee**2+ff**2) ) + ss
+!
+!              grntmp(i0,j0,k0) = recfourpi*real(gg2)/(4*hx*hy*hz)
+
               gg2 = aa + bb + cc + dd + ee + ff
 
               grntmp(i0,j0,k0) = recfourpi*gg2/(hx*hy*hz)
@@ -1124,6 +1242,7 @@
             enddo
           enddo
         enddo
+!        print*,"grntmp2:",sum(grntmp),sum(grn)
 
         scalex = 1.0d0
         scaley = 1.0d0
@@ -1159,6 +1278,7 @@
         allocate(x2(n2/2+1,nsizexy,nsizez))
 
         ! FFTs along y dimensions:
+!        call MPI_BARRIER(commcol,ierr)
         call trans3d_TRANSP(nxx,n2/2+1,nsizexy,nsizey,x0,x2,npy,&
                      ystable,gyrtable,commcol,nsizez)
         deallocate(x0)
@@ -2554,32 +2674,32 @@
            endif
            ky=dky(l,m,e)
            kz=sqrt((kx*kx+ky*ky)/(deps-1)) ! omega/c
-           do k=1,Nz
-            z=(k-1)*hz
-            fs(k)=amp(l,m,e)*cos(kz*z)
-            fa(k)=amp(l,m,e)*sin(kz*z)
-            lam(k)=0
-            laa(k)=0
-            do n=1,Nx
-             x0=xmin+(n-1)*hx
-             do p=1,Ny
-              y0=ymin+(p-1)*hy
-              lam(k)=lam(k)+chgdens(n,p,k)*cosh(kx*y0)*cos(kx*x0)
-              laa(k)=laa(k)+chgdens(n,p,k)*sinh(kx*y0)*cos(kx*x0)
-             enddo ! p
-            enddo ! n
-           enddo ! k
-           if(e.eq.1)then
-            call dwakeConv_FieldQuant(Nz,lam,hz,fs,lams)
-            call dwakeConv_FieldQuant(Nz,lam,hz,fa,lama)
-           else
-            call dwakeConv_FieldQuant(Nz,laa,hz,fs,laas)
-            call dwakeConv_FieldQuant(Nz,laa,hz,fa,laaa)
-           endif
            do i=1,Nx
             x=xmin+(i-1)*hx
             do j=1,Ny
              y=ymin+(j-1)*hy
+             do k=1,Nz
+              z=(k-1)*hz
+              fs(k)=amp(l,m,e)*cos(kz*z)
+              fa(k)=amp(l,m,e)*sin(kz*z)
+              lam(k)=0
+              laa(k)=0
+              do n=1,Nx
+               x0=xmin+(n-1)*hx
+               do p=1,Ny
+                y0=ymin+(p-1)*hy
+                lam(k)=lam(k)+chgdens(n,p,k)*cosh(kx*y0)*cos(kx*x0)
+                laa(k)=laa(k)+chgdens(n,p,k)*sinh(kx*y0)*cos(kx*x0)
+               enddo ! p
+              enddo ! n
+             enddo ! k
+             if(e.eq.1)then
+              call dwakeConv_FieldQuant(Nz,lam,hz,fs,lams)
+              call dwakeConv_FieldQuant(Nz,lam,hz,fa,lama)
+             else
+              call dwakeConv_FieldQuant(Nz,laa,hz,fs,laas)
+              call dwakeConv_FieldQuant(Nz,laa,hz,fa,laaa)
+             endif
              do k=1,Nz
               if(par.eq.0.and.e.eq.1)then ! LSM-SYM
                dexwake(i,j,k)=dexwake(i,j,k)-lama(k)*sin(kx*x)*cosh(kx*y)&
@@ -2624,7 +2744,6 @@
           enddo ! m
          enddo ! l
         enddo ! e
-
        
        ! take care of units: V/m and T
         conv2V=dv*gammaz/lx/hz
@@ -2674,6 +2793,7 @@
        endif ! dtype
 
        end subroutine dwakefield_FieldQuant
+
 
        ! make convolution for d-wakefields
        subroutine dwakeConv_FieldQuant(Nz,weightz,&

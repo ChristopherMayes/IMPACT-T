@@ -1135,6 +1135,7 @@
         double precision, dimension(6) :: ptrange
         double precision :: rr,rrap
  
+        !print*,"into lost:"
         ptrange(1) = -xrad/Scxlt
         ptrange(2) = xrad/Scxlt
         ptrange(3) = -yrad/Scxlt
@@ -1167,10 +1168,12 @@
           else if(this%Pts1(5,i0).le.ptrange(5) .and. &
                   this%Pts1(6,i0).lt.0.0) then
             ilost = ilost + 1
+!            print*,"ilost:",ilost,i,this%Pts1(5,i0)
           else if(this%Pts1(5,i0).ge.ptrange(6)) then
             ilost = ilost + 1
 !          else if(this%Pts1(6,i0).lt.0.0) then !this does not allow particles move in negative direction
 !            ilost = ilost + 1
+!            print*,"ilost2:",ilost,i,this%Pts1(5,i0)
           else
           endif
         enddo
